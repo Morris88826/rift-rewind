@@ -29,17 +29,46 @@
       </div>
     </div>
 
+    <!-- Champion Selection -->
+    <div class="champion-selection">
+      <h2>Track Champions</h2>
+      <p class="selection-subtitle">Select champions to track their progression</p>
+      <div class="champion-selector">
+        <label v-for="champion in masteryData" :key="champion.name" class="champion-checkbox">
+          <input
+            type="checkbox"
+            :value="champion.name"
+            v-model="selectedChampions"
+            class="checkbox-input"
+          />
+          <span class="checkbox-label">
+            {{ champion.emoji }} {{ champion.name }}
+            <span class="level-info">Lv {{ champion.level }}</span>
+          </span>
+        </label>
+      </div>
+      <div class="selection-actions">
+        <button @click="selectAllChampions" class="action-btn">Select All</button>
+        <button @click="clearSelection" class="action-btn secondary">Clear</button>
+      </div>
+    </div>
+
     <!-- Mastery Progression Chart -->
-    <div class="progression-container">
+    <div class="progression-container" v-if="selectedChampions.length > 0">
       <h2>Mastery Progression Over Time</h2>
+      <p class="chart-subtitle">{{ selectedChampions.length }} champion(s) selected</p>
       <div class="chart-holder">
         <canvas ref="progressionChart"></canvas>
       </div>
     </div>
 
-    <!-- Champion Cards Section (2K Style) -->
-    <div class="champions-section">
-      <h2>Top Champions</h2>
+    <div v-else class="no-selection">
+      <p>👈 Select champions above to view their progression</p>
+    </div>
+
+    <!-- Single Champion Details (Only when one champion selected) -->
+    <div class="champions-section" v-if="selectedChampions.length === 1">
+      <h2>{{ selectedChampions[0] }} Details</h2>
       <div class="champions-grid">
         <div v-for="champion in topChampionsCards" :key="champion.name" class="player-card" :class="`rarity-${champion.rarity}`">
           <!-- Card Background -->
@@ -74,10 +103,17 @@
               </div>
             </div>
 
-            <!-- Badges -->
+            <!-- Badges with Progression -->
             <div class="badges-container">
-              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge" :class="`badge-${badge.tier}`" :title="badge.description">
-                <span class="badge-icon">{{ badge.icon }}</span>
+              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper">
+                <div class="achievement-badge" :class="`badge-${badge.tier}`" :title="`${badge.description} - ${badge.requirement}`">
+                  <span class="badge-icon">{{ badge.icon }}</span>
+                  <span class="badge-tier">{{ badge.tier[0].toUpperCase() }}</span>
+                </div>
+                <div class="badge-progress-bar">
+                  <div class="badge-progress-fill" :style="{ width: badge.progress + '%' }"></div>
+                </div>
+                <span class="badge-progress-text">{{ badge.progress }}%</span>
               </div>
             </div>
 
@@ -156,6 +192,7 @@ const goBack = () => {
 }
 
 const selectedMasteryLevel = ref('All')
+const selectedChampions = ref([])
 
 // Sample mastery data with kill/assist tracking
 const masteryData = ref([
@@ -184,43 +221,118 @@ const getRarityTier = (level) => {
   return { rarity: 'common', name: 'Common' }
 }
 
-// Generate achievement badges based on stats
+// Generate badges with progression system (like 2K)
 const generateBadges = (champion) => {
   const badges = []
   const avgKA = Math.round((champion.totalKills + champion.totalAssists) / champion.matches)
 
-  // High Kill Badge
-  if (champion.totalKills > 1200) {
-    badges.push({ name: 'Kill Master', tier: 'gold', icon: '⚡', description: 'High kill count' })
-  }
+  // Kill Master Badge - Bronze to Diamond
+  const killProgress = Math.min(100, Math.round((champion.totalKills / 1500) * 100))
+  const killTier = champion.totalKills >= 1500 ? 'diamond' :
+                   champion.totalKills >= 1200 ? 'gold' :
+                   champion.totalKills >= 900 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Kill Master',
+    tier: killTier,
+    icon: '⚡',
+    description: 'High kill count',
+    progress: killProgress,
+    requirement: `${champion.totalKills}/1500 kills`
+  })
 
-  // High Assist Badge
-  if (champion.totalAssists > 800) {
-    badges.push({ name: 'Team Player', tier: 'silver', icon: '🤝', description: 'High assist count' })
-  }
+  // Team Player Badge - Bronze to Diamond
+  const assistProgress = Math.min(100, Math.round((champion.totalAssists / 1000) * 100))
+  const assistTier = champion.totalAssists >= 1000 ? 'diamond' :
+                     champion.totalAssists >= 800 ? 'gold' :
+                     champion.totalAssists >= 500 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Team Player',
+    tier: assistTier,
+    icon: '🤝',
+    description: 'High assist count',
+    progress: assistProgress,
+    requirement: `${champion.totalAssists}/1000 assists`
+  })
 
-  // Win Rate Badge
-  if (champion.winrate >= 60) {
-    badges.push({ name: 'Dominant', tier: 'diamond', icon: '👑', description: '60%+ win rate' })
-  } else if (champion.winrate >= 55) {
-    badges.push({ name: 'Efficient', tier: 'gold', icon: '✅', description: '55%+ win rate' })
-  }
+  // Dominant Badge - Win Rate progression
+  const winRateProgress = Math.min(100, champion.winrate)
+  const winTier = champion.winrate >= 60 ? 'diamond' :
+                  champion.winrate >= 55 ? 'gold' :
+                  champion.winrate >= 50 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Dominant',
+    tier: winTier,
+    icon: '👑',
+    description: 'Win rate progression',
+    progress: winRateProgress,
+    requirement: `${champion.winrate}% win rate`
+  })
 
-  // Experience Badge
-  if (champion.matches > 100) {
-    badges.push({ name: 'Veteran', tier: 'silver', icon: '🎖️', description: '100+ matches' })
-  }
+  // Veteran Badge - Match progression
+  const matchProgress = Math.min(100, Math.round((champion.matches / 150) * 100))
+  const matchTier = champion.matches >= 150 ? 'diamond' :
+                    champion.matches >= 120 ? 'gold' :
+                    champion.matches >= 60 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Veteran',
+    tier: matchTier,
+    icon: '🎖️',
+    description: 'Match experience',
+    progress: matchProgress,
+    requirement: `${champion.matches}/150 matches`
+  })
 
-  // K/A Ratio Badge
-  if (avgKA > 18) {
-    badges.push({ name: 'Decisive', tier: 'gold', icon: '🎯', description: 'High K/A ratio' })
-  }
+  // Decisive Badge - K/A Ratio progression
+  const ratioProgress = Math.min(100, Math.round((avgKA / 20) * 100))
+  const ratiTier = avgKA >= 20 ? 'diamond' :
+                   avgKA >= 18 ? 'gold' :
+                   avgKA >= 15 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Decisive',
+    tier: ratiTier,
+    icon: '🎯',
+    description: 'High K/A ratio',
+    progress: ratioProgress,
+    requirement: `${avgKA}/20 K/A ratio`
+  })
 
   return badges
 }
 
-// Top champions cards (only top 5 for cleaner display)
+// Selection functions
+const selectAllChampions = () => {
+  selectedChampions.value = masteryData.value.map(c => c.name)
+}
+
+const clearSelection = () => {
+  selectedChampions.value = []
+}
+
+// Get selected champions data for display
+const selectedChampionsData = computed(() => {
+  if (selectedChampions.value.length === 0) return []
+  return masteryData.value.filter(c => selectedChampions.value.includes(c.name))
+})
+
+// Top champions cards (only show when exactly one is selected)
 const topChampionsCards = computed(() => {
+  // If exactly one champion is selected, show their details
+  if (selectedChampions.value.length === 1) {
+    const selectedChamp = masteryData.value.find(c => c.name === selectedChampions.value[0])
+    if (!selectedChamp) return []
+
+    const rarity = getRarityTier(selectedChamp.level)
+    const kaRatio = (selectedChamp.totalKills + selectedChamp.totalAssists) / selectedChamp.matches
+    return [{
+      ...selectedChamp,
+      ...rarity,
+      rarityName: rarity.name,
+      kaRatio: kaRatio.toFixed(1),
+      badges: generateBadges(selectedChamp),
+    }]
+  }
+
+  // Default: show top 5 (won't be displayed due to v-if)
   return masteryData.value
     .sort((a, b) => b.points - a.points)
     .slice(0, 5)
@@ -270,6 +382,11 @@ onMounted(() => {
   initProgressionChart()
 })
 
+// Watch for changes in selected champions and reinitialize chart
+watch(selectedChampions, () => {
+  initProgressionChart()
+})
+
 const initProgressionChart = () => {
   if (!progressionChart.value) return
 
@@ -281,20 +398,23 @@ const initProgressionChart = () => {
 
   // Calculate cumulative progression over time (simulate weekly data)
   const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8']
-  const topChampions = sortedChampions.value.slice(0, 5)
+  const championsToDisplay = selectedChampionsData.value.length > 0 ? selectedChampionsData.value : []
+  const displayChampions = championsToDisplay.slice(0, 8) // Limit to 8 champions for readability
 
-  const datasets = topChampions.map((champion, idx) => {
-    const colors = ['#a855f7', '#06b6d4', '#86efac', '#fca5a5', '#fbbf24']
+  const colors = ['#a855f7', '#06b6d4', '#86efac', '#fca5a5', '#fbbf24', '#ec4899', '#f59e0b', '#8b5cf6']
+
+  const datasets = displayChampions.map((champion, idx) => {
+    const color = colors[idx % colors.length]
     return {
       label: champion.name,
       data: champion.progression.slice(0, weeks.length),
-      borderColor: colors[idx],
-      backgroundColor: colors[idx] + '22',
+      borderColor: color,
+      backgroundColor: color + '22',
       borderWidth: 2.5,
       fill: true,
       tension: 0.4,
       pointRadius: 4,
-      pointBackgroundColor: colors[idx],
+      pointBackgroundColor: color,
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
       pointHoverRadius: 6,
@@ -454,6 +574,132 @@ const initProgressionChart = () => {
   color: #a78bfa;
   font-size: 2rem;
   font-weight: 700;
+}
+
+/* Champion Selection */
+.champion-selection {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.champion-selection h2 {
+  color: #e2e8f0;
+  font-size: 1.5rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.selection-subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0 0 20px 0;
+}
+
+.champion-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.champion-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.champion-checkbox:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6366f1;
+}
+
+.checkbox-label {
+  color: #cbd5e1;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.level-info {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: auto;
+  background: rgba(99, 102, 241, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.selection-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.action-btn.secondary {
+  background: rgba(99, 102, 241, 0.2);
+  color: #cbd5e1;
+}
+
+.action-btn.secondary:hover {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* No Selection Message */
+.no-selection {
+  background: rgba(30, 41, 59, 0.6);
+  border: 2px dashed rgba(99, 102, 241, 0.3);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.no-selection p {
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.chart-subtitle {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin: 0 0 20px 0;
 }
 
 /* Progression Chart */
@@ -651,33 +897,76 @@ const initProgressionChart = () => {
   font-weight: 700;
 }
 
-/* Badges Container */
+/* Badges Container with Progression */
 .badges-container {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
+}
+
+.achievement-badge-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
 }
 
 .achievement-badge {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 2px solid;
   transition: all 0.2s;
   cursor: pointer;
+  position: relative;
+  font-size: 0.7rem;
 }
 
 .achievement-badge:hover {
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .badge-icon {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.badge-tier {
+  font-weight: 800;
+  font-size: 0.65rem;
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+.badge-progress-bar {
+  width: 100px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #d946ef);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 4px rgba(168, 85, 247, 0.6);
+}
+
+.badge-progress-text {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .badge-gold {
