@@ -1,6 +1,7 @@
 <template>
-  <!-- Floating Chat Button -->
+  <!-- Floating Chat Button (only on rewind pages) -->
   <button
+    v-if="isRewindPage"
     @click="toggleChat"
     class="chat-fab"
     aria-label="Open chat assistant"
@@ -31,9 +32,9 @@
     </svg>
   </button>
 
-  <!-- Chat Modal -->
+  <!-- Chat Modal (only on rewind pages) -->
   <Transition name="slide-up">
-    <div v-if="isOpen" class="chat-modal">
+    <div v-if="isOpen && isRewindPage" class="chat-modal">
       <div class="chat-header">
         <h3>AI Assistant</h3>
         <button @click="toggleChat" class="close-btn" aria-label="Close chat">×</button>
@@ -95,19 +96,43 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const isOpen = ref(false)
 const isLoading = ref(false)
 const userInput = ref('')
 const messagesContainer = ref(null)
-const messages = ref([
-  {
-    text: 'Hey there! I\'m your AI assistant. Ask me anything about League of Legends, gaming, or how to use Rift Rewind!',
-    isUser: false,
-    timestamp: new Date(),
-  },
-])
+const messages = ref([])
+const chatInitialized = ref(false)
+
+// Check if we're on a rewind page
+const isRewindPage = computed(() => {
+  return route.name === 'rewind' || route.name === 'calendar' || route.name === 'infographic' || route.name === 'mastery'
+})
+
+const riotId = computed(() => route.params.riotId || '')
+
+// Initialize greeting message when entering rewind page
+watch(isRewindPage, (newVal) => {
+  if (newVal && !chatInitialized.value) {
+    const greeting = `Hey ${riotId.value}! 👋 Welcome to your Rift Rewind! I'm your AI assistant. Ask me anything about your stats, League of Legends, or how to use this app!`
+    messages.value = [
+      {
+        text: greeting,
+        isUser: false,
+        timestamp: new Date(),
+      },
+    ]
+    chatInitialized.value = true
+  } else if (!newVal) {
+    // Reset chat when leaving rewind page
+    messages.value = []
+    chatInitialized.value = false
+    isOpen.value = false
+  }
+})
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
