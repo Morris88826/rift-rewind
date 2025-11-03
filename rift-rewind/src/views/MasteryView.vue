@@ -103,17 +103,19 @@
               </div>
             </div>
 
-            <!-- Badges with Progression -->
+            <!-- Badges with Progression (Grid Layout) -->
             <div class="badges-container">
-              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper">
+              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper" :class="{ achieved: badge.progress > 0 }">
                 <div class="achievement-badge" :class="`badge-${badge.tier}`" :title="`${badge.description} - ${badge.requirement}`">
                   <span class="badge-icon">{{ badge.icon }}</span>
                   <span class="badge-tier">{{ badge.tier[0].toUpperCase() }}</span>
                 </div>
-                <div class="badge-progress-bar">
-                  <div class="badge-progress-fill" :style="{ width: badge.progress + '%' }"></div>
+                <div class="badge-info">
+                  <div class="badge-progress-bar">
+                    <div class="badge-progress-fill" :style="{ width: badge.progress + '%' }"></div>
+                  </div>
+                  <span class="badge-progress-text">{{ badge.progress }}%</span>
                 </div>
-                <span class="badge-progress-text">{{ badge.progress }}%</span>
               </div>
             </div>
 
@@ -396,10 +398,16 @@ const initProgressionChart = () => {
 
   const ctx = progressionChart.value.getContext('2d')
 
-  // Calculate cumulative progression over time (simulate weekly data)
-  const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8']
   const championsToDisplay = selectedChampionsData.value.length > 0 ? selectedChampionsData.value : []
   const displayChampions = championsToDisplay.slice(0, 8) // Limit to 8 champions for readability
+
+  if (displayChampions.length === 0) {
+    return
+  }
+
+  // Find the maximum progression array length to determine labels
+  const maxLength = Math.max(...displayChampions.map(c => c.progression.length))
+  const weeks = Array.from({ length: maxLength }, (_, i) => `Week ${i + 1}`)
 
   const colors = ['#a855f7', '#06b6d4', '#86efac', '#fca5a5', '#fbbf24', '#ec4899', '#f59e0b', '#8b5cf6']
 
@@ -407,7 +415,7 @@ const initProgressionChart = () => {
     const color = colors[idx % colors.length]
     return {
       label: champion.name,
-      data: champion.progression.slice(0, weeks.length),
+      data: champion.progression,
       borderColor: color,
       backgroundColor: color + '22',
       borderWidth: 2.5,
@@ -450,7 +458,6 @@ const initProgressionChart = () => {
       scales: {
         y: {
           beginAtZero: true,
-          max: 400000,
           ticks: {
             color: '#94a3b8',
             font: { size: 11 },
@@ -899,17 +906,24 @@ const initProgressionChart = () => {
 
 /* Badges Container with Progression */
 .badges-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 20px;
   margin-bottom: 16px;
+  padding: 16px 0;
 }
 
 .achievement-badge-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.achievement-badge-wrapper.achieved {
+  opacity: 1;
 }
 
 .achievement-badge {
@@ -947,11 +961,19 @@ const initProgressionChart = () => {
   border-radius: 3px;
 }
 
+.badge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  width: 100%;
+}
+
 .badge-progress-bar {
-  width: 100px;
-  height: 6px;
+  width: 80px;
+  height: 4px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid rgba(99, 102, 241, 0.2);
 }
@@ -965,7 +987,7 @@ const initProgressionChart = () => {
 
 .badge-progress-text {
   color: #94a3b8;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
