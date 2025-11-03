@@ -122,7 +122,7 @@
       <div v-if="selectedChampion !== 'All'" class="champion-card-left">
         <div class="champion-card">
           <div class="champion-icon">
-            <img v-if="getChampionIcon(selectedChampion)" :src="getChampionIcon(selectedChampion)" :alt="selectedChampion" class="champion-portrait" />
+            <img v-if="getChampionPortrait(selectedChampion)" :src="getChampionPortrait(selectedChampion)" :alt="selectedChampion" class="champion-portrait" />
             <span v-else class="champion-fallback-lg">{{ selectedChampion[0] }}</span>
           </div>
           <h2 class="champion-name">{{ selectedChampion }}</h2>
@@ -237,10 +237,21 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
-import championImagesData from '/championImages.json'
 
 const router = useRouter()
 const route = useRoute()
+
+// Load champion images data
+const championImagesData = ref(null)
+onMounted(async () => {
+  try {
+    const response = await fetch('/championImages.json')
+    championImagesData.value = await response.json()
+  } catch (error) {
+    console.error('Failed to load champion images:', error)
+    championImagesData.value = { championImage: {} }
+  }
+})
 
 const riotId = computed(() => route.params.riotId || '')
 const region = computed(() => route.params.region || '')
@@ -279,16 +290,24 @@ const matchData = ref([
   { champion: 'Ahri', lane: 'Mid', mode: 'Ranked', kills: 11, deaths: 3, assists: 11, cs: 305, gold: 15100, damage: 18500, participation: 86 },
 ])
 
-// Get unique champions from data
+// Get available champions from JSON data
 const availableChampions = computed(() => {
-  const champs = new Set(matchData.value.map(m => m.champion))
-  return Array.from(champs).sort()
+  if (!championImagesData.value) return []
+  return Object.keys(championImagesData.value.championImage).sort()
 })
 
 // Helper function to get champion icon
 const getChampionIcon = (championName) => {
-  const images = championImagesData.championImage
+  if (!championImagesData.value) return null
+  const images = championImagesData.value.championImage
   return images[championName]?.championIcon || null
+}
+
+// Helper function to get champion portrait
+const getChampionPortrait = (championName) => {
+  if (!championImagesData.value) return null
+  const images = championImagesData.value.championImage
+  return images[championName]?.championPortrait || null
 }
 
 // Filter matches based on selections
