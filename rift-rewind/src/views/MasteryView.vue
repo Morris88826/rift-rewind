@@ -63,10 +63,10 @@
     </div>
 
     <!-- Single Champion Details (Only when one champion selected) -->
-    <div class="champions-section" v-if="selectedChampions.length === 1">
+    <div class="champions-section" v-if="selectedChampData">
       <h2>{{ selectedChampions[0] }} Details</h2>
       <div class="champions-grid">
-        <div v-for="champion in topChampionsCards" :key="champion.name" class="player-card" :class="`rarity-${champion.rarity}`">
+        <div class="player-card" :class="`rarity-${selectedChampData.rarity}`">
           <!-- Card Background -->
           <div class="card-background"></div>
 
@@ -74,12 +74,15 @@
           <div class="card-content">
             <div class="card-header">
               <div class="avatar-section">
-                <div class="avatar">{{ champion.emoji }}</div>
-                <div class="level-indicator">{{ champion.level }}</div>
+                <div class="avatar">
+                  <img  :src="getChampionIcon(selectedChampions[0])" :alt="selectedChampions[0]" class="champion-icon-img" />
+
+                </div>
+                <div class="level-indicator">{{ selectedChampData.level }}</div>
               </div>
               <div class="name-section">
-                <h3 class="champion-name">{{ champion.name }}</h3>
-                <p class="rarity-name">{{ champion.rarityName }}</p>
+                <h3 class="champion-name">{{ selectedChampData.name }}</h3>
+                <p class="rarity-name">{{ selectedChampData.rarityName }}</p>
               </div>
             </div>
 
@@ -87,30 +90,32 @@
             <div class="stats-row">
               <div class="stat">
                 <span class="stat-label">Kills</span>
-                <span class="stat-value">{{ champion.totalKills }}</span>
+                <span class="stat-value">{{ selectedChampData.totalKills }}</span>
               </div>
               <div class="stat">
                 <span class="stat-label">Assists</span>
-                <span class="stat-value">{{ champion.totalAssists }}</span>
+                <span class="stat-value">{{ selectedChampData.totalAssists }}</span>
               </div>
               <div class="stat">
                 <span class="stat-label">K/A Ratio</span>
-                <span class="stat-value">{{ champion.kaRatio }}</span>
+                <span class="stat-value">{{ selectedChampData.kaRatio }}</span>
               </div>
             </div>
 
-            <!-- Badges with Progression (Grid Layout) -->
-            <div class="badges-container">
-              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper" :class="{ achieved: badge.progress > 0 || badge.alwaysActive }">
-                <div class="achievement-badge" :class="`badge-${badge.tier}`" :title="`${badge.description} - ${badge.requirement}`">
-                  <span class="badge-icon">{{ badge.icon }}</span>
-                  <span class="badge-tier">{{ badge.tier[0].toUpperCase() }}</span>
-                </div>
-                <div class="badge-info">
-                  <div class="badge-progress-bar">
-                    <div class="badge-progress-fill" :style="{ width: badge.progress + '%' }"></div>
+            <!-- Badges with Progression (2K Grid Layout) -->
+            <div class="badges-section">
+              <h4 class="badges-title">🏆 BADGES</h4>
+              <div class="badges-container">
+                <div v-for="badge in selectedChampData.badges" :key="badge.name" class="achievement-badge-wrapper" :class="{ achieved: badge.progress > 0 || badge.alwaysActive }">
+                  <div class="achievement-badge" :class="`badge-${badge.tier}`" :title="`${badge.description} - ${badge.requirement}`">
+                    <span class="badge-icon">{{ badge.icon }}</span>
                   </div>
-                  <span class="badge-progress-text">{{ badge.progress }}%</span>
+                  <div class="badge-info">
+                    <span class="badge-name">{{ badge.name }}</span>
+                    <div class="badge-progress-bar">
+                      <div class="badge-progress-fill" :style="{ width: badge.progress + '%' }"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -119,11 +124,11 @@
             <div class="card-footer">
               <div class="detail">
                 <span>Matches:</span>
-                <strong>{{ champion.matches }}</strong>
+                <strong>{{ selectedChampData.matches }}</strong>
               </div>
               <div class="detail">
                 <span>Winrate:</span>
-                <strong :class="{ high: champion.winrate >= 50 }">{{ champion.winrate }}%</strong>
+                <strong :class="{ high: selectedChampData.winrate >= 50 }">{{ selectedChampData.winrate }}%</strong>
               </div>
             </div>
           </div>
@@ -138,7 +143,10 @@
         <div v-for="champion in sortedChampions" :key="champion.name" class="stat-card" :class="{ selected: selectedChampions[0] === champion.name }" @click="selectChampion(champion.name)">
           <div class="card-header">
             <div class="champion-info">
-              <span class="champion-emoji">{{ champion.emoji }}</span>
+              <div class="champion-icon-wrapper">
+                <img v-if="championIconsMap[champion.name]" :src="championIconsMap[champion.name]" :alt="champion.name" class="champion-icon-small" />
+                <span v-else class="champion-emoji">{{ champion.emoji }}</span>
+              </div>
               <span class="champion-name">{{ champion.name }}</span>
             </div>
             <span class="level-badge" :class="`level-${champion.level}`">Lv {{ champion.level }}</span>
@@ -180,9 +188,13 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
+import championImagesJson from '../data/championImages.json'
 
 const router = useRouter()
 const route = useRoute()
+
+// Load champion images data
+const championImagesData = ref(championImagesJson)
 
 const riotId = computed(() => route.params.riotId || '')
 const region = computed(() => route.params.region || '')
@@ -227,6 +239,23 @@ const getRarityTier = (level) => {
   if (level === 5) return { rarity: 'silver', name: 'Silver' }
   if (level === 4) return { rarity: 'bronze', name: 'Bronze' }
   return { rarity: 'common', name: 'Common' }
+}
+
+// Cache champion icons to avoid repeated lookups
+const championIconsMap = computed(() => {
+  if (!championImagesData.value) return {}
+  const map = {}
+  const images = championImagesData.value.championImage
+  Object.keys(images).forEach(name => {
+    map[name] = images[name]?.championIcon || null
+  })
+  return map
+})
+
+// Get champion icon from cached map
+const getChampionIcon = (championName) => {
+  console.log('Fetching icon for:', championName)
+  return championIconsMap.value[championName] || null
 }
 
 // Generate badges with progression system (like 2K)
@@ -387,45 +416,22 @@ const selectChampion = (championName) => {
   selectedChampions.value = [championName]
 }
 
-// Get selected champions data for display
-const selectedChampionsData = computed(() => {
-  if (selectedChampions.value.length === 0) return []
-  return masteryData.value.filter(c => selectedChampions.value.includes(c.name))
-})
+// Get selected champion data for details card
+const selectedChampData = computed(() => {
+  if (selectedChampions.value.length !== 1) return null
 
-// Top champions cards (only show when exactly one is selected)
-const topChampionsCards = computed(() => {
-  // If exactly one champion is selected, show their details
-  if (selectedChampions.value.length === 1) {
-    const selectedChamp = masteryData.value.find(c => c.name === selectedChampions.value[0])
-    if (!selectedChamp) return []
+  const selectedChamp = masteryData.value.find(c => c.name === selectedChampions.value[0])
+  if (!selectedChamp) return null
 
-    const rarity = getRarityTier(selectedChamp.level)
-    const kaRatio = (selectedChamp.totalKills + selectedChamp.totalAssists) / selectedChamp.matches
-    return [{
-      ...selectedChamp,
-      ...rarity,
-      rarityName: rarity.name,
-      kaRatio: kaRatio.toFixed(1),
-      badges: generateBadges(selectedChamp),
-    }]
+  const rarity = getRarityTier(selectedChamp.level)
+  const kaRatio = (selectedChamp.totalKills + selectedChamp.totalAssists) / selectedChamp.matches
+  return {
+    ...selectedChamp,
+    ...rarity,
+    rarityName: rarity.name,
+    kaRatio: kaRatio.toFixed(1),
+    badges: generateBadges(selectedChamp),
   }
-
-  // Default: show top 5 (won't be displayed due to v-if)
-  return masteryData.value
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 5)
-    .map(champion => {
-      const rarity = getRarityTier(champion.level)
-      const kaRatio = (champion.totalKills + champion.totalAssists) / champion.matches
-      return {
-        ...champion,
-        ...rarity,
-        rarityName: rarity.name,
-        kaRatio: kaRatio.toFixed(1),
-        badges: generateBadges(champion),
-      }
-    })
 })
 
 // Sorted champions by points (descending)
@@ -496,11 +502,17 @@ const initProgressionChart = () => {
   const ctx = canvasElement.getContext('2d')
   if (!ctx) return
 
-  const championsToDisplay = selectedChampionsData.value && selectedChampionsData.value.length > 0 ? selectedChampionsData.value : []
-
-  if (championsToDisplay.length === 0) {
+  // Get the selected champion's data for progression chart
+  if (selectedChampions.value.length === 0) {
     return
   }
+
+  const selectedChamp = masteryData.value.find(c => c.name === selectedChampions.value[0])
+  if (!selectedChamp) {
+    return
+  }
+
+  const championsToDisplay = [selectedChamp]
 
   const displayChampions = championsToDisplay.slice(0, 8) // Limit to 8 champions for readability
 
@@ -713,110 +725,6 @@ const initProgressionChart = () => {
   font-weight: 700;
 }
 
-/* Champion Selection */
-.champion-selection {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 40px;
-  backdrop-filter: blur(10px);
-}
-
-.champion-selection h2 {
-  color: #e2e8f0;
-  font-size: 1.5rem;
-  margin: 0 0 8px 0;
-  font-weight: 600;
-}
-
-.selection-subtitle {
-  color: #94a3b8;
-  font-size: 0.95rem;
-  margin: 0 0 20px 0;
-}
-
-.champion-selector {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.champion-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.champion-checkbox:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-.checkbox-input {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: #6366f1;
-}
-
-.checkbox-label {
-  color: #cbd5e1;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
-}
-
-.level-info {
-  color: #94a3b8;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-left: auto;
-  background: rgba(99, 102, 241, 0.2);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.selection-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.action-btn {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.action-btn:hover {
-  background: linear-gradient(135deg, #7c3aed, #6366f1);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-.action-btn.secondary {
-  background: rgba(99, 102, 241, 0.2);
-  color: #cbd5e1;
-}
-
-.action-btn.secondary:hover {
-  background: rgba(99, 102, 241, 0.3);
-  border-color: rgba(99, 102, 241, 0.5);
-}
-
 /* No Selection Message */
 .no-selection {
   background: rgba(30, 41, 59, 0.6);
@@ -993,15 +901,33 @@ const initProgressionChart = () => {
 
 .avatar {
   font-size: 3.5rem;
-  display: block;
-  width: 80px;
-  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 80px;
+  height: 80px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   border: 2px solid rgba(168, 85, 247, 0.3);
+  position: relative;
+}
+
+.champion-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.champion-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.avatar-fallback {
+  font-size: 3.5rem;
 }
 
 .level-indicator {
@@ -1077,76 +1003,92 @@ const initProgressionChart = () => {
   font-weight: 700;
 }
 
-/* Badges Container with Progression */
+/* Badges Section - 2K Style */
+.badges-section {
+  padding: 20px 0;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  margin-bottom: 16px;
+}
+
+.badges-title {
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
 .badges-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 20px;
-  margin-bottom: 16px;
-  padding: 16px 0;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 
 .achievement-badge-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   align-items: center;
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
+  gap: 8px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .achievement-badge-wrapper.achieved {
   opacity: 1;
 }
 
+.achievement-badge-wrapper:hover {
+  transform: translateY(-4px);
+}
+
 .achievement-badge {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 2px solid;
   transition: all 0.2s;
-  cursor: pointer;
   position: relative;
-  font-size: 0.7rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .achievement-badge:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .badge-icon {
-  font-size: 1.4rem;
+  font-size: 2rem;
   line-height: 1;
-}
-
-.badge-tier {
-  font-weight: 800;
-  font-size: 0.65rem;
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 1px 3px;
-  border-radius: 3px;
 }
 
 .badge-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   width: 100%;
 }
 
+.badge-name {
+  color: #cbd5e1;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 .badge-progress-bar {
-  width: 80px;
-  height: 4px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 2px;
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
   overflow: hidden;
   border: 1px solid rgba(99, 102, 241, 0.2);
 }
@@ -1154,42 +1096,36 @@ const initProgressionChart = () => {
 .badge-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #a855f7, #d946ef);
-  transition: width 0.3s ease;
-  box-shadow: 0 0 4px rgba(168, 85, 247, 0.6);
-}
-
-.badge-progress-text {
-  color: #94a3b8;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.badge-gold {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: rgba(255, 215, 0, 0.6);
-  color: #ffd700;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-}
-
-.badge-silver {
-  background: rgba(192, 192, 192, 0.2);
-  border-color: rgba(192, 192, 192, 0.6);
-  color: #c0c0c0;
-  box-shadow: 0 0 8px rgba(192, 192, 192, 0.3);
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
 }
 
 .badge-diamond {
-  background: rgba(100, 200, 255, 0.2);
-  border-color: rgba(100, 200, 255, 0.6);
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.3), rgba(50, 150, 255, 0.2));
+  border-color: rgba(100, 200, 255, 0.8);
   color: #64c8ff;
-  box-shadow: 0 0 8px rgba(100, 200, 255, 0.3);
+  box-shadow: 0 0 16px rgba(100, 200, 255, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 180, 0, 0.2));
+  border-color: rgba(255, 215, 0, 0.8);
+  color: #ffd700;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.badge-silver {
+  background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(150, 150, 150, 0.2));
+  border-color: rgba(192, 192, 192, 0.8);
+  color: #c0c0c0;
+  box-shadow: 0 0 16px rgba(192, 192, 192, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .badge-bronze {
-  background: rgba(205, 127, 50, 0.2);
-  border-color: rgba(205, 127, 50, 0.6);
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(180, 100, 40, 0.2));
+  border-color: rgba(205, 127, 50, 0.8);
   color: #cd7f32;
-  box-shadow: 0 0 8px rgba(205, 127, 50, 0.3);
+  box-shadow: 0 0 16px rgba(205, 127, 50, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Card Footer */
@@ -1292,6 +1228,25 @@ const initProgressionChart = () => {
 .champion-emoji {
   font-size: 2rem;
   line-height: 1;
+}
+
+.champion-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.champion-icon-small {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .champion-name {
@@ -1481,10 +1436,8 @@ const initProgressionChart = () => {
     grid-template-columns: 1fr 1fr 1fr;
   }
 
-  .mastery-table th,
-  .mastery-table td {
-    padding: 8px;
-    font-size: 0.8rem;
+  .badges-container {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .chart-holder {
@@ -1534,16 +1487,17 @@ const initProgressionChart = () => {
   }
 
   .badges-container {
-    gap: 6px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .achievement-badge {
-    width: 36px;
-    height: 36px;
+    width: 50px;
+    height: 50px;
   }
 
   .badge-icon {
-    font-size: 1rem;
+    font-size: 1.5rem;
   }
 
   .mastery-stats {
