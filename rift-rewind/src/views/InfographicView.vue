@@ -29,7 +29,7 @@
           <label class="filter-label">Lane</label>
           <div class="filter-buttons">
             <button
-              v-for="lane in lanes"
+              v-for="lane in availableLanes"
               :key="lane"
               @click="selectedLane = lane"
               class="filter-btn"
@@ -281,9 +281,31 @@ const selectedMode = ref('All')
 const filterExpanded = ref(false)
 const championSearch = ref('')
 
-// Available options
-const lanes = ['Mid', 'Support', 'ADC', 'Top', 'Jungle']
+// Available game modes
 const gameModes = ['Ranked', 'Unranked', 'ARAM']
+
+// Extract available lanes from champion data in JSON
+const availableLanes = computed(() => {
+  const lanesSet = new Set()
+
+  // Add lanes from match data
+  matchData.value.forEach(match => {
+    if (match.lane) lanesSet.add(match.lane)
+  })
+
+  // Add lanes from JSON data
+  if (championImagesData.value) {
+    Object.values(championImagesData.value.championImage).forEach(champData => {
+      if (champData.lane) {
+        // Split lanes if they contain "/"
+        const lanes = champData.lane.split('/').map(l => l.trim())
+        lanes.forEach(lane => lanesSet.add(lane))
+      }
+    })
+  }
+
+  return Array.from(lanesSet).sort()
+})
 
 // Sample match data with more details
 const matchData = ref([
@@ -313,15 +335,24 @@ const availableChampions = computed(() => {
   return Array.from(matchChampions).sort()
 })
 
-// Filter champions based on search input
+// Filter champions based on search input and selected lane
 const filteredChampions = computed(() => {
-  if (!championSearch.value) {
-    return availableChampions.value
+  let filtered = availableChampions.value
+
+  // Filter by lane if a specific lane is selected
+  if (selectedLane.value !== 'All') {
+    filtered = filtered.filter(champion => canChampionPlayLane(champion, selectedLane.value))
   }
-  const searchLower = championSearch.value.toLowerCase()
-  return availableChampions.value.filter(champion =>
-    champion.toLowerCase().includes(searchLower)
-  )
+
+  // Filter by search input
+  if (championSearch.value) {
+    const searchLower = championSearch.value.toLowerCase()
+    filtered = filtered.filter(champion =>
+      champion.toLowerCase().includes(searchLower)
+    )
+  }
+
+  return filtered
 })
 
 // Helper function to get champion icon
@@ -336,6 +367,22 @@ const getChampionPortrait = (championName) => {
   if (!championImagesData.value) return null
   const images = championImagesData.value.championImage
   return images[championName]?.championPortrait || null
+}
+
+// Helper function to get champion lanes from JSON
+const getChampionLanes = (championName) => {
+  if (!championImagesData.value) return []
+  const champData = championImagesData.value.championImage[championName]
+  if (!champData || !champData.lane) return []
+  // Split lanes by "/" and trim whitespace
+  return champData.lane.split('/').map(lane => lane.trim())
+}
+
+// Helper function to check if champion can play a specific lane
+const canChampionPlayLane = (championName, lane) => {
+  if (lane === 'All') return true
+  const champLanes = getChampionLanes(championName)
+  return champLanes.includes(lane)
 }
 
 // Filter matches based on selections
