@@ -177,7 +177,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
 
@@ -430,7 +430,10 @@ const topChampionsCards = computed(() => {
 
 // Sorted champions by points (descending)
 const sortedChampions = computed(() => {
-  return [...masteryData.value].sort((a, b) => b.points - a.points)
+  return [...masteryData.value].sort((a, b) => b.points - a.points).map(c => ({
+    ...c,
+    progressPercent: Math.min(100, Math.round((c.level / 7) * 100))
+  }))
 })
 
 // Calculate stats
