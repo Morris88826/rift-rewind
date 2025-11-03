@@ -49,9 +49,25 @@
 
         <div class="filter-group">
           <label class="filter-label">Champion</label>
+          <div class="champion-search-container">
+            <input
+              v-model="championSearch"
+              type="text"
+              placeholder="Search champions..."
+              class="champion-search-input"
+            />
+            <button
+              v-if="championSearch"
+              @click="championSearch = ''"
+              class="search-clear-btn"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          </div>
           <div class="champion-filter">
             <button
-              v-for="champion in availableChampions"
+              v-for="champion in filteredChampions"
               :key="champion"
               @click="selectedChampion = champion"
               class="champion-filter-btn"
@@ -237,21 +253,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
+import championImagesJson from '../data/championImages.json'
 
 const router = useRouter()
 const route = useRoute()
 
 // Load champion images data
-const championImagesData = ref(null)
-onMounted(async () => {
-  try {
-    const response = await fetch('/championImages.json')
-    championImagesData.value = await response.json()
-  } catch (error) {
-    console.error('Failed to load champion images:', error)
-    championImagesData.value = { championImage: {} }
-  }
-})
+const championImagesData = ref(championImagesJson)
 
 const riotId = computed(() => route.params.riotId || '')
 const region = computed(() => route.params.region || '')
@@ -271,6 +279,7 @@ const selectedLane = ref('All')
 const selectedChampion = ref('All')
 const selectedMode = ref('All')
 const filterExpanded = ref(false)
+const championSearch = ref('')
 
 // Available options
 const lanes = ['Mid', 'Support', 'ADC', 'Top', 'Jungle']
@@ -290,10 +299,29 @@ const matchData = ref([
   { champion: 'Ahri', lane: 'Mid', mode: 'Ranked', kills: 11, deaths: 3, assists: 11, cs: 305, gold: 15100, damage: 18500, participation: 86 },
 ])
 
-// Get available champions from JSON data
+// Get available champions from both match data and JSON data
 const availableChampions = computed(() => {
-  if (!championImagesData.value) return []
-  return Object.keys(championImagesData.value.championImage).sort()
+  // Get champions from match data
+  const matchChampions = new Set(matchData.value.map(m => m.champion))
+
+  // Get champions from JSON data if loaded
+  if (championImagesData.value) {
+    const jsonChampions = Object.keys(championImagesData.value.championImage)
+    jsonChampions.forEach(champ => matchChampions.add(champ))
+  }
+
+  return Array.from(matchChampions).sort()
+})
+
+// Filter champions based on search input
+const filteredChampions = computed(() => {
+  if (!championSearch.value) {
+    return availableChampions.value
+  }
+  const searchLower = championSearch.value.toLowerCase()
+  return availableChampions.value.filter(champion =>
+    champion.toLowerCase().includes(searchLower)
+  )
 })
 
 // Helper function to get champion icon
@@ -747,6 +775,57 @@ const initChart = () => {
 .filter-btn.champion-btn.active {
   background: linear-gradient(135deg, #a855f7, #d946ef);
   box-shadow: 0 0 16px rgba(217, 70, 239, 0.4);
+}
+
+/* Champion Search */
+.champion-search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.champion-search-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 10px 14px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.champion-search-input:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.6);
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.champion-search-input::placeholder {
+  color: #64748b;
+}
+
+.search-clear-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(99, 102, 241, 0.2);
+  border: none;
+  border-radius: 6px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear-btn:hover {
+  background: rgba(99, 102, 241, 0.4);
+  transform: scale(1.05);
 }
 
 /* Champion Filter Buttons with Icons */
