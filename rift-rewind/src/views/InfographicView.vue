@@ -49,20 +49,23 @@
 
         <div class="filter-group">
           <label class="filter-label">Champion</label>
-          <div class="filter-buttons">
+          <div class="champion-filter">
             <button
               v-for="champion in availableChampions"
               :key="champion"
               @click="selectedChampion = champion"
-              class="filter-btn champion-btn"
+              class="champion-filter-btn"
               :class="{ active: selectedChampion === champion }"
+              :title="champion"
             >
-              {{ champion }}
+              <img v-if="getChampionIcon(champion)" :src="getChampionIcon(champion)" :alt="champion" class="champion-icon-img" />
+              <span v-else class="champion-fallback">{{ champion[0] }}</span>
             </button>
             <button
               @click="selectedChampion = 'All'"
-              class="filter-btn"
+              class="champion-filter-btn all-btn"
               :class="{ active: selectedChampion === 'All' }"
+              title="All Champions"
             >
               All
             </button>
@@ -118,7 +121,10 @@
       <!-- Left: Champion Card (only when champion selected) -->
       <div v-if="selectedChampion !== 'All'" class="champion-card-left">
         <div class="champion-card">
-          <div class="champion-icon">👤</div>
+          <div class="champion-icon">
+            <img v-if="getChampionIcon(selectedChampion)" :src="getChampionIcon(selectedChampion)" :alt="selectedChampion" class="champion-portrait" />
+            <span v-else class="champion-fallback-lg">{{ selectedChampion[0] }}</span>
+          </div>
           <h2 class="champion-name">{{ selectedChampion }}</h2>
           <div class="champion-matches">{{ championMatches.length }} Matches</div>
 
@@ -231,6 +237,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Chart from 'chart.js/auto'
+import championImagesData from '/championImages.json'
 
 const router = useRouter()
 const route = useRoute()
@@ -277,6 +284,12 @@ const availableChampions = computed(() => {
   const champs = new Set(matchData.value.map(m => m.champion))
   return Array.from(champs).sort()
 })
+
+// Helper function to get champion icon
+const getChampionIcon = (championName) => {
+  const images = championImagesData.championImage
+  return images[championName]?.championIcon || null
+}
 
 // Filter matches based on selections
 const filteredMatches = computed(() => {
@@ -715,6 +728,91 @@ const initChart = () => {
 .filter-btn.champion-btn.active {
   background: linear-gradient(135deg, #a855f7, #d946ef);
   box-shadow: 0 0 16px rgba(217, 70, 239, 0.4);
+}
+
+/* Champion Filter Buttons with Icons */
+.champion-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.champion-filter-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  background: rgba(30, 41, 59, 0.8);
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.champion-filter-btn:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  background: rgba(30, 41, 59, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.champion-filter-btn.active {
+  border-color: rgba(168, 85, 247, 0.8);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(217, 70, 239, 0.2));
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.4), inset 0 0 8px rgba(168, 85, 247, 0.2);
+}
+
+.champion-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.champion-fallback {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.champion-filter-btn.all-btn {
+  width: auto;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.champion-filter-btn.all-btn:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+}
+
+.champion-filter-btn.all-btn.active {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-color: #a855f7;
+  color: white;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+}
+
+/* Champion Card Portrait */
+.champion-icon .champion-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.champion-fallback-lg {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #a78bfa;
 }
 
 /* Stats Summary */
