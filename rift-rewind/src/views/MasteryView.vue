@@ -29,41 +29,37 @@
       </div>
     </div>
 
-    <!-- Champion Selection -->
-    <div class="champion-selection">
-      <h2>Track Champions</h2>
-      <p class="selection-subtitle">Select champions to track their progression</p>
-      <div class="champion-selector">
-        <label v-for="champion in masteryData" :key="champion.name" class="champion-checkbox">
-          <input
-            type="checkbox"
-            :value="champion.name"
-            v-model="selectedChampions"
-            class="checkbox-input"
-          />
-          <span class="checkbox-label">
-            {{ champion.emoji }} {{ champion.name }}
-            <span class="level-info">Lv {{ champion.level }}</span>
-          </span>
-        </label>
-      </div>
-      <div class="selection-actions">
-        <button @click="selectAllChampions" class="action-btn">Select All</button>
-        <button @click="clearSelection" class="action-btn secondary">Clear</button>
-      </div>
-    </div>
-
     <!-- Mastery Progression Chart -->
     <div class="progression-container" v-if="selectedChampions.length > 0">
-      <h2>Mastery Progression Over Time</h2>
-      <p class="chart-subtitle">{{ selectedChampions.length }} champion(s) selected</p>
+      <div class="progression-header">
+        <div>
+          <h2>Mastery Progression Over Time</h2>
+          <p class="chart-subtitle">{{ selectedChampions[0] }}'s progression</p>
+        </div>
+        <div class="chart-controls">
+          <button
+            @click="chartTimeframe = 'month'"
+            :class="{ active: chartTimeframe === 'month' }"
+            class="timeframe-btn"
+          >
+            📅 Month
+          </button>
+          <button
+            @click="chartTimeframe = 'week'"
+            :class="{ active: chartTimeframe === 'week' }"
+            class="timeframe-btn"
+          >
+            📊 Week
+          </button>
+        </div>
+      </div>
       <div class="chart-holder">
         <canvas ref="progressionChart"></canvas>
       </div>
     </div>
 
     <div v-else class="no-selection">
-      <p>👈 Select champions above to view their progression</p>
+      <p>👆 Click a champion card above to view their progression</p>
     </div>
 
     <!-- Single Champion Details (Only when one champion selected) -->
@@ -105,7 +101,7 @@
 
             <!-- Badges with Progression (Grid Layout) -->
             <div class="badges-container">
-              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper" :class="{ achieved: badge.progress > 0 }">
+              <div v-for="badge in champion.badges" :key="badge.name" class="achievement-badge-wrapper" :class="{ achieved: badge.progress > 0 || badge.alwaysActive }">
                 <div class="achievement-badge" :class="`badge-${badge.tier}`" :title="`${badge.description} - ${badge.requirement}`">
                   <span class="badge-icon">{{ badge.icon }}</span>
                   <span class="badge-tier">{{ badge.tier[0].toUpperCase() }}</span>
@@ -135,38 +131,46 @@
       </div>
     </div>
 
-    <!-- Mastery Details Table -->
-    <div class="mastery-table-container">
-      <h2>Detailed Mastery Stats</h2>
-      <div class="table-scroll">
-        <table class="mastery-table">
-          <thead>
-            <tr>
-              <th>Champion</th>
-              <th>Level</th>
-              <th>Points</th>
-              <th>Matches</th>
-              <th>Winrate</th>
-              <th>Progress</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="champion in sortedChampions" :key="champion.name">
-              <td class="champ-name">{{ champion.emoji }} {{ champion.name }}</td>
-              <td class="level">
-                <span class="level-badge" :class="`level-${champion.level}`">{{ champion.level }}</span>
-              </td>
-              <td class="points">{{ champion.points }}</td>
-              <td class="matches">{{ champion.matches }}</td>
-              <td class="winrate" :class="{ high: champion.winrate >= 50 }">{{ champion.winrate }}%</td>
-              <td class="progress">
-                <div class="small-progress-bar">
+    <!-- Mastery Details Grid -->
+    <div class="mastery-stats-section">
+      <h2>Champion Mastery Stats</h2>
+      <div class="stats-grid">
+        <div v-for="champion in sortedChampions" :key="champion.name" class="stat-card" :class="{ selected: selectedChampions[0] === champion.name }" @click="selectChampion(champion.name)">
+          <div class="card-header">
+            <div class="champion-info">
+              <span class="champion-emoji">{{ champion.emoji }}</span>
+              <span class="champion-name">{{ champion.name }}</span>
+            </div>
+            <span class="level-badge" :class="`level-${champion.level}`">Lv {{ champion.level }}</span>
+          </div>
+
+          <div class="card-body">
+            <div class="stat-row">
+              <div class="stat-item">
+                <span class="stat-label">Points</span>
+                <span class="stat-value points">{{ champion.points.toLocaleString() }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Matches</span>
+                <span class="stat-value matches">{{ champion.matches }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Winrate</span>
+                <span class="stat-value winrate" :class="{ high: champion.winrate >= 50 }">{{ champion.winrate }}%</span>
+              </div>
+            </div>
+
+            <div class="progress-section">
+              <span class="progress-label">Mastery Progress</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar">
                   <div class="progress-fill" :style="{ width: champion.progressPercent + '%' }"></div>
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <span class="progress-percent">{{ champion.progressPercent }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -194,7 +198,6 @@ const goBack = () => {
 }
 
 const selectedMasteryLevel = ref('All')
-const selectedChampions = ref([])
 
 // Sample mastery data with kill/assist tracking
 const masteryData = ref([
@@ -207,6 +210,9 @@ const masteryData = ref([
   { name: 'Sylas', level: 4, points: 112000, matches: 58, winrate: 54, emoji: '⛓️', totalKills: 845, totalAssists: 678, progression: [0, 35000, 75000, 112000] },
   { name: 'Qiyana', level: 3, points: 78000, matches: 42, winrate: 60, emoji: '💎', totalKills: 654, totalAssists: 423, progression: [0, 32000, 78000] },
 ])
+
+// Default to first champion from masteryData
+const selectedChampions = ref([masteryData.value[0].name])
 
 // Get unique mastery levels
 const masteryLevels = computed(() => {
@@ -298,16 +304,87 @@ const generateBadges = (champion) => {
     requirement: `${avgKA}/20 K/A ratio`
   })
 
+  // Reliable Badge - Always Active (participation)
+  const reliabilityScore = Math.min(100, Math.round((champion.matches / 50) * 100))
+  const reliabilityTier = champion.matches >= 150 ? 'diamond' :
+                          champion.matches >= 100 ? 'gold' :
+                          champion.matches >= 50 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Reliable',
+    tier: reliabilityTier,
+    icon: '📍',
+    description: 'Consistent performer',
+    progress: reliabilityScore,
+    requirement: `${champion.matches}/150 participations`,
+    alwaysActive: true
+  })
+
+  // Momentum Badge - Points progression
+  const pointsPerMatch = Math.round(champion.points / champion.matches)
+  const momentumProgress = Math.min(100, Math.round((pointsPerMatch / 3000) * 100))
+  const momentumTier = pointsPerMatch >= 3000 ? 'diamond' :
+                       pointsPerMatch >= 2500 ? 'gold' :
+                       pointsPerMatch >= 2000 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Momentum',
+    tier: momentumTier,
+    icon: '📈',
+    description: 'Points per match',
+    progress: momentumProgress,
+    requirement: `${pointsPerMatch} points/match`
+  })
+
+  // Clutch Badge - Based on win rate (close wins)
+  const clutchProgress = Math.min(100, champion.winrate)
+  const clutchTier = champion.winrate >= 60 ? 'diamond' :
+                     champion.winrate >= 55 ? 'gold' :
+                     champion.winrate >= 50 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Clutch',
+    tier: clutchTier,
+    icon: '🔥',
+    description: 'Clutch performance',
+    progress: clutchProgress,
+    requirement: `${champion.winrate}% clutch wins`,
+    alwaysActive: true
+  })
+
+  // Elite Badge - Overall mastery level (always active if level > 0)
+  const eliteProgress = Math.min(100, champion.level * 14.28)
+  const eliteTier = champion.level === 7 ? 'diamond' :
+                    champion.level === 6 ? 'gold' :
+                    champion.level === 5 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Elite',
+    tier: eliteTier,
+    icon: '💎',
+    description: 'Mastery level',
+    progress: eliteProgress,
+    requirement: `Level ${champion.level}/7`,
+    alwaysActive: true
+  })
+
+  // Engagement Badge - Kills + Assists combined
+  const engagementScore = Math.round((champion.totalKills + champion.totalAssists) / 2)
+  const engagementProgress = Math.min(100, Math.round((engagementScore / 2000) * 100))
+  const engagementTier = engagementScore >= 2000 ? 'diamond' :
+                         engagementScore >= 1500 ? 'gold' :
+                         engagementScore >= 1000 ? 'silver' : 'bronze'
+  badges.push({
+    name: 'Engagement',
+    tier: engagementTier,
+    icon: '⚔️',
+    description: 'Combat engagement',
+    progress: engagementProgress,
+    requirement: `${engagementScore} total impact`
+  })
+
   return badges
 }
 
-// Selection functions
-const selectAllChampions = () => {
-  selectedChampions.value = masteryData.value.map(c => c.name)
-}
-
-const clearSelection = () => {
-  selectedChampions.value = []
+// Selection function
+const selectChampion = (championName) => {
+  selectedChampions.value = [championName]
 }
 
 // Get selected champions data for display
@@ -378,6 +455,7 @@ const topChampion = computed(() => {
 
 
 const progressionChart = ref(null)
+const chartTimeframe = ref('month')
 
 // Initialize progression chart
 onMounted(() => {
@@ -385,43 +463,92 @@ onMounted(() => {
 })
 
 // Watch for changes in selected champions and reinitialize chart
-watch(selectedChampions, () => {
+watch(selectedChampions, async () => {
+  await nextTick()
+  initProgressionChart()
+})
+
+// Watch for timeframe changes and redraw chart
+watch(chartTimeframe, async () => {
+  await nextTick()
   initProgressionChart()
 })
 
 const initProgressionChart = () => {
-  if (!progressionChart.value) return
-
-  if (progressionChart.value.chart) {
-    progressionChart.value.chart.destroy()
-  }
-
-  const ctx = progressionChart.value.getContext('2d')
-
-  const championsToDisplay = selectedChampionsData.value.length > 0 ? selectedChampionsData.value : []
-  const displayChampions = championsToDisplay.slice(0, 8) // Limit to 8 champions for readability
-
-  if (displayChampions.length === 0) {
+  // Wait for canvas to be available
+  if (!progressionChart.value) {
     return
   }
 
+  // Get the canvas element itself
+  const canvasElement = progressionChart.value
+  if (!canvasElement) return
+
+  // Destroy existing chart
+  if (canvasElement.chart) {
+    canvasElement.chart.destroy()
+    canvasElement.chart = null
+  }
+
+  const ctx = canvasElement.getContext('2d')
+  if (!ctx) return
+
+  const championsToDisplay = selectedChampionsData.value && selectedChampionsData.value.length > 0 ? selectedChampionsData.value : []
+
+  if (championsToDisplay.length === 0) {
+    return
+  }
+
+  const displayChampions = championsToDisplay.slice(0, 8) // Limit to 8 champions for readability
+
   // Find the maximum progression array length to determine labels
   const maxLength = Math.max(...displayChampions.map(c => c.progression.length))
-  const weeks = Array.from({ length: maxLength }, (_, i) => `Week ${i + 1}`)
+
+  // Prepare labels and data based on timeframe
+  let labels = []
+  const weeksPerMonth = 4
+  const samplingInterval = chartTimeframe.value === 'month' ? weeksPerMonth : 1
+
+  if (chartTimeframe.value === 'month') {
+    // Create month labels
+    for (let i = 0; i < maxLength; i += weeksPerMonth) {
+      const monthIndex = Math.floor(i / weeksPerMonth) + 1
+      labels.push(`Month ${monthIndex}`)
+    }
+  } else {
+    // Create week labels
+    labels = Array.from({ length: maxLength }, (_, i) => `Week ${i + 1}`)
+  }
 
   const colors = ['#a855f7', '#06b6d4', '#86efac', '#fca5a5', '#fbbf24', '#ec4899', '#f59e0b', '#8b5cf6']
 
   const datasets = displayChampions.map((champion, idx) => {
     const color = colors[idx % colors.length]
+    let progressionData = []
+
+    if (chartTimeframe.value === 'month') {
+      // Sample data at monthly intervals (every 4 weeks)
+      for (let i = 0; i < champion.progression.length; i += weeksPerMonth) {
+        progressionData.push(champion.progression[i])
+      }
+      // Ensure we have the final value
+      if (progressionData[progressionData.length - 1] !== champion.progression[champion.progression.length - 1]) {
+        progressionData.push(champion.progression[champion.progression.length - 1])
+      }
+    } else {
+      // Show all weekly data
+      progressionData = champion.progression
+    }
+
     return {
       label: champion.name,
-      data: champion.progression,
+      data: progressionData,
       borderColor: color,
       backgroundColor: color + '22',
       borderWidth: 2.5,
       fill: true,
       tension: 0.4,
-      pointRadius: 4,
+      pointRadius: chartTimeframe.value === 'month' ? 5 : 3,
       pointBackgroundColor: color,
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
@@ -432,7 +559,7 @@ const initProgressionChart = () => {
   const chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: weeks,
+      labels: labels,
       datasets: datasets,
     },
     options: {
@@ -724,6 +851,49 @@ const initProgressionChart = () => {
   font-size: 1.5rem;
   margin: 0 0 20px 0;
   font-weight: 600;
+}
+
+.progression-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.progression-header > div:first-child h2 {
+  margin: 0 0 8px 0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.timeframe-btn {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.timeframe-btn:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  background: rgba(99, 102, 241, 0.2);
+  color: #f1f5f9;
+}
+
+.timeframe-btn.active {
+  background: linear-gradient(135deg, #a855f7, #d946ef);
+  border-color: rgba(168, 85, 247, 0.8);
+  color: white;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
 .chart-holder {
@@ -1055,130 +1225,207 @@ const initProgressionChart = () => {
   color: #86efac;
 }
 
-/* Mastery Table */
-.mastery-table-container {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+/* Mastery Stats Section */
+.mastery-stats-section {
+  margin-bottom: 40px;
+}
+
+.mastery-stats-section h2 {
+  color: #f1f5f9;
+  font-size: 1.8rem;
+  margin: 0 0 32px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(20, 25, 50, 0.9));
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 16px;
-  padding: 30px;
-  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.mastery-table-container h2 {
-  color: #e2e8f0;
-  font-size: 1.5rem;
-  margin: 0 0 20px 0;
-  font-weight: 600;
+.stat-card:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.2);
+  transform: translateY(-4px);
+  cursor: pointer;
 }
 
-.table-scroll {
-  overflow-x: auto;
+.stat-card.selected {
+  border-color: rgba(99, 102, 241, 0.8);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1));
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.3), inset 0 0 20px rgba(99, 102, 241, 0.1);
 }
 
-.mastery-table {
-  width: 100%;
-  border-collapse: collapse;
+.stat-card.selected:hover {
+  border-color: rgba(99, 102, 241, 0.9);
+  box-shadow: 0 14px 48px rgba(99, 102, 241, 0.4), inset 0 0 20px rgba(99, 102, 241, 0.15);
 }
 
-.mastery-table thead {
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.mastery-table th {
-  color: #a78bfa;
-  padding: 12px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
   border-bottom: 1px solid rgba(99, 102, 241, 0.2);
 }
 
-.mastery-table td {
-  color: #cbd5e1;
-  padding: 12px;
-  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
-  font-size: 0.9rem;
+.champion-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.mastery-table tbody tr:hover {
-  background: rgba(99, 102, 241, 0.1);
+.champion-emoji {
+  font-size: 2rem;
+  line-height: 1;
 }
 
-.champ-name {
-  color: #e2e8f0;
-  font-weight: 600;
-}
-
-.level {
-  text-align: center;
+.champion-name {
+  color: #f1f5f9;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.3px;
 }
 
 .level-badge {
   background: linear-gradient(135deg, #a855f7, #d946ef);
   color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 700;
-  display: inline-block;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .level-badge.level-7 {
   background: linear-gradient(135deg, #ffd700, #ffb700);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 
 .level-badge.level-6 {
   background: linear-gradient(135deg, #a855f7, #d946ef);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 
 .level-badge.level-5 {
   background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .level-badge.level-4 {
   background: linear-gradient(135deg, #22c55e, #84cc16);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .level-badge.level-3 {
-  background: linear-gradient(135deg, #a8a2a2, #d4d4d4);
+  background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.3);
 }
 
-.points,
-.matches {
-  text-align: center;
+.card-body {
+  padding: 20px;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-value {
+  color: #f1f5f9;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.stat-value.points {
+  color: #fbbf24;
+}
+
+.stat-value.matches {
   color: #a78bfa;
-  font-weight: 600;
 }
 
-.winrate {
-  text-align: center;
-  color: #fca5a5;
-  font-weight: 600;
+.stat-value.winrate {
+  color: #f87171;
 }
 
-.winrate.high {
+.stat-value.winrate.high {
   color: #86efac;
 }
 
-.progress {
-  text-align: center;
+.progress-section {
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  padding-top: 16px;
 }
 
-.small-progress-bar {
-  background: rgba(0, 0, 0, 0.3);
-  height: 6px;
-  border-radius: 3px;
+.progress-label {
+  display: block;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-bar {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.8);
+  height: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  display: inline-block;
-  width: 120px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-.small-progress-bar .progress-fill {
+.progress-fill {
   height: 100%;
-  border-radius: 3px;
+  background: linear-gradient(90deg, #a855f7, #d946ef);
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  transition: width 0.4s ease;
+}
+
+.progress-percent {
+  color: #a78bfa;
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 35px;
+  text-align: right;
 }
 
 /* Animations */
