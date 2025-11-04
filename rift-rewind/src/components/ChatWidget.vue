@@ -116,6 +116,7 @@ const riotId = computed(() => route.params.riotId || '')
 
 // Initialize greeting message when entering rewind page
 watch(isRewindPage, (newVal) => {
+  console.log('isRewindPage changed to:', newVal)
   if (newVal && !chatInitialized.value) {
     const greeting = `Hey ${riotId.value}! 👋 Welcome to your Rift Rewind! I'm your AI assistant. Ask me anything about your stats, League of Legends, or how to use this app!`
     messages.value = [

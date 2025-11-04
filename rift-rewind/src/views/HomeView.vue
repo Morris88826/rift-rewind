@@ -54,7 +54,7 @@ const goToRewind = (searchData) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/background.jpg');
+  /* background-image: url('/background.jpg'); */
   background-size: cover;
   background-position: center;
   opacity: 0.25;
