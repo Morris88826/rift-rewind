@@ -109,7 +109,7 @@ const chatInitialized = ref(false)
 
 // Check if we're on a rewind page
 const isRewindPage = computed(() => {
-  return route.name === 'rewind' || route.name === 'calendar' || route.name === 'infographic' || route.name === 'mastery'
+  return route.name !== 'home'
 })
 
 const riotId = computed(() => route.params.riotId || '')
