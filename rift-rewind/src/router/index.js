@@ -4,6 +4,7 @@ import RewindView from '../views/RewindView.vue'
 import CalendarView from '../views/CalendarView.vue'
 import InfographicView from '../views/InfographicView.vue'
 import MasteryView from '../views/MasteryView.vue'
+import LeagueGuesserView from '../views/LeagueGuesserView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/rewind/:riotId/:region/mastery',
       name: 'mastery',
       component: MasteryView,
+    },
+    {
+      path: '/rewind/:riotId/:region/guesser',
+      name: 'guesser',
+      component: LeagueGuesserView,
     },
     {
       path: '/about',

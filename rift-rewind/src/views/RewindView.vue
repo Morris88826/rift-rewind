@@ -124,6 +124,14 @@ const handleFeatureClick = (featureId) => {
         region: region.value,
       },
     })
+  } else if (featureId === 'guesser') {
+    router.push({
+      name: 'guesser',
+      params: {
+        riotId: riotId.value,
+        region: region.value,
+      },
+    })
   } else {
     console.log(`Clicked on ${featureId}`)
     // TODO: Navigate to other feature pages

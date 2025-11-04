@@ -1,0 +1,354 @@
+{
+  "blue": {
+    "deathLocationData": {
+      "Ahri": [
+        { "x": 150, "y": 200, "location": "Mid Lane", "count": 42 },
+        { "x": 350, "y": 150, "location": "Baron Pit", "count": 28 },
+        { "x": 200, "y": 400, "location": "River", "count": 35 },
+        { "x": 450, "y": 350, "location": "Enemy Base", "count": 18 },
+        { "x": 100, "y": 350, "location": "Jungle", "count": 22 }
+      ],
+      "Lux": [
+        { "x": 200, "y": 250, "location": "Mid Lane", "count": 32 },
+        { "x": 400, "y": 200, "location": "Baron Pit", "count": 18 },
+        { "x": 150, "y": 380, "location": "River", "count": 28 },
+        { "x": 480, "y": 300, "location": "Enemy Base", "count": 12 },
+        { "x": 120, "y": 320, "location": "Jungle", "count": 8 }
+      ],
+      "Zed": [
+        { "x": 180, "y": 220, "location": "Mid Lane", "count": 56 },
+        { "x": 380, "y": 180, "location": "Baron Pit", "count": 32 },
+        { "x": 220, "y": 420, "location": "River", "count": 38 },
+        { "x": 420, "y": 360, "location": "Enemy Base", "count": 20 },
+        { "x": 110, "y": 360, "location": "Jungle", "count": 10 }
+      ],
+      "Yasuo": [
+        { "x": 170, "y": 210, "location": "Mid Lane", "count": 62 },
+        { "x": 370, "y": 160, "location": "Baron Pit", "count": 38 },
+        { "x": 210, "y": 410, "location": "River", "count": 44 },
+        { "x": 460, "y": 340, "location": "Enemy Base", "count": 22 },
+        { "x": 105, "y": 340, "location": "Jungle", "count": 12 }
+      ],
+      "Evelynn": [
+        { "x": 140, "y": 180, "location": "Mid Lane", "count": 28 },
+        { "x": 340, "y": 140, "location": "Baron Pit", "count": 15 },
+        { "x": 190, "y": 390, "location": "River", "count": 22 },
+        { "x": 470, "y": 320, "location": "Enemy Base", "count": 14 },
+        { "x": 95, "y": 330, "location": "Jungle", "count": 8 }
+      ],
+      "Akali": [
+        { "x": 160, "y": 190, "location": "Mid Lane", "count": 38 },
+        { "x": 360, "y": 150, "location": "Baron Pit", "count": 22 },
+        { "x": 200, "y": 400, "location": "River", "count": 30 },
+        { "x": 440, "y": 330, "location": "Enemy Base", "count": 16 },
+        { "x": 100, "y": 340, "location": "Jungle", "count": 6 }
+      ],
+      "Sylas": [
+        { "x": 175, "y": 205, "location": "Mid Lane", "count": 48 },
+        { "x": 375, "y": 170, "location": "Baron Pit", "count": 28 },
+        { "x": 215, "y": 415, "location": "River", "count": 32 },
+        { "x": 450, "y": 345, "location": "Enemy Base", "count": 18 },
+        { "x": 110, "y": 345, "location": "Jungle", "count": 8 }
+      ],
+      "Qiyana": [
+        { "x": 155, "y": 195, "location": "Mid Lane", "count": 32 },
+        { "x": 355, "y": 145, "location": "Baron Pit", "count": 18 },
+        { "x": 195, "y": 395, "location": "River", "count": 24 },
+        { "x": 435, "y": 325, "location": "Enemy Base", "count": 10 },
+        { "x": 98, "y": 325, "location": "Jungle", "count": 5 }
+      ]
+    },
+    "killLocationData": {
+      "Ahri": [
+        { "x": 150, "y": 200, "location": "Mid Lane", "count": 285 },
+        { "x": 350, "y": 150, "location": "Baron Pit", "count": 210 },
+        { "x": 200, "y": 400, "location": "River", "count": 245 },
+        { "x": 450, "y": 350, "location": "Enemy Base", "count": 156 },
+        { "x": 100, "y": 350, "location": "Jungle", "count": 300 }
+      ],
+      "Lux": [
+        { "x": 200, "y": 250, "location": "Mid Lane", "count": 198 },
+        { "x": 400, "y": 200, "location": "Baron Pit", "count": 102 },
+        { "x": 150, "y": 380, "location": "River", "count": 145 },
+        { "x": 480, "y": 300, "location": "Enemy Base", "count": 85 },
+        { "x": 120, "y": 320, "location": "Jungle", "count": 56 }
+      ],
+      "Zed": [
+        { "x": 180, "y": 220, "location": "Mid Lane", "count": 385 },
+        { "x": 380, "y": 180, "location": "Baron Pit", "count": 245 },
+        { "x": 220, "y": 420, "location": "River", "count": 325 },
+        { "x": 420, "y": 360, "location": "Enemy Base", "count": 178 },
+        { "x": 110, "y": 360, "location": "Jungle", "count": 95 }
+      ],
+      "Yasuo": [
+        { "x": 170, "y": 210, "location": "Mid Lane", "count": 425 },
+        { "x": 370, "y": 160, "location": "Baron Pit", "count": 285 },
+        { "x": 210, "y": 410, "location": "River", "count": 358 },
+        { "x": 460, "y": 340, "location": "Enemy Base", "count": 195 },
+        { "x": 105, "y": 340, "location": "Jungle", "count": 108 }
+      ],
+      "Evelynn": [
+        { "x": 140, "y": 180, "location": "Mid Lane", "count": 265 },
+        { "x": 340, "y": 140, "location": "Baron Pit", "count": 145 },
+        { "x": 190, "y": 390, "location": "River", "count": 198 },
+        { "x": 470, "y": 320, "location": "Enemy Base", "count": 125 },
+        { "x": 95, "y": 330, "location": "Jungle", "count": 95 }
+      ],
+      "Akali": [
+        { "x": 160, "y": 190, "location": "Mid Lane", "count": 325 },
+        { "x": 360, "y": 150, "location": "Baron Pit", "count": 185 },
+        { "x": 200, "y": 400, "location": "River", "count": 255 },
+        { "x": 440, "y": 330, "location": "Enemy Base", "count": 145 },
+        { "x": 100, "y": 340, "location": "Jungle", "count": 68 }
+      ],
+      "Sylas": [
+        { "x": 175, "y": 205, "location": "Mid Lane", "count": 328 },
+        { "x": 375, "y": 170, "location": "Baron Pit", "count": 215 },
+        { "x": 215, "y": 415, "location": "River", "count": 268 },
+        { "x": 450, "y": 345, "location": "Enemy Base", "count": 158 },
+        { "x": 110, "y": 345, "location": "Jungle", "count": 88 }
+      ],
+      "Qiyana": [
+        { "x": 155, "y": 195, "location": "Mid Lane", "count": 245 },
+        { "x": 355, "y": 145, "location": "Baron Pit", "count": 148 },
+        { "x": 195, "y": 395, "location": "River", "count": 185 },
+        { "x": 435, "y": 325, "location": "Enemy Base", "count": 95 },
+        { "x": 98, "y": 325, "location": "Jungle", "count": 52 }
+      ]
+    },
+    "assistLocationData": {
+      "Ahri": [
+        { "x": 150, "y": 200, "location": "Mid Lane", "count": 156 },
+        { "x": 350, "y": 150, "location": "Baron Pit", "count": 95 },
+        { "x": 200, "y": 400, "location": "River", "count": 128 },
+        { "x": 450, "y": 350, "location": "Enemy Base", "count": 72 },
+        { "x": 100, "y": 350, "location": "Jungle", "count": 98 }
+      ],
+      "Lux": [
+        { "x": 200, "y": 250, "location": "Mid Lane", "count": 250 },
+        { "x": 400, "y": 200, "location": "Baron Pit", "count": 135 },
+        { "x": 150, "y": 380, "location": "River", "count": 198 },
+        { "x": 480, "y": 300, "location": "Enemy Base", "count": 98 },
+        { "x": 120, "y": 320, "location": "Jungle", "count": 65 }
+      ],
+      "Zed": [
+        { "x": 180, "y": 220, "location": "Mid Lane", "count": 145 },
+        { "x": 380, "y": 180, "location": "Baron Pit", "count": 85 },
+        { "x": 220, "y": 420, "location": "River", "count": 125 },
+        { "x": 420, "y": 360, "location": "Enemy Base", "count": 65 },
+        { "x": 110, "y": 360, "location": "Jungle", "count": 42 }
+      ],
+      "Yasuo": [
+        { "x": 170, "y": 210, "location": "Mid Lane", "count": 158 },
+        { "x": 370, "y": 160, "location": "Baron Pit", "count": 102 },
+        { "x": 210, "y": 410, "location": "River", "count": 145 },
+        { "x": 460, "y": 340, "location": "Enemy Base", "count": 75 },
+        { "x": 105, "y": 340, "location": "Jungle", "count": 48 }
+      ],
+      "Evelynn": [
+        { "x": 140, "y": 180, "location": "Mid Lane", "count": 198 },
+        { "x": 340, "y": 140, "location": "Baron Pit", "count": 98 },
+        { "x": 190, "y": 390, "location": "River", "count": 145 },
+        { "x": 470, "y": 320, "location": "Enemy Base", "count": 88 },
+        { "x": 95, "y": 330, "location": "Jungle", "count": 65 }
+      ],
+      "Akali": [
+        { "x": 160, "y": 190, "location": "Mid Lane", "count": 125 },
+        { "x": 360, "y": 150, "location": "Baron Pit", "count": 75 },
+        { "x": 200, "y": 400, "location": "River", "count": 102 },
+        { "x": 440, "y": 330, "location": "Enemy Base", "count": 65 },
+        { "x": 100, "y": 340, "location": "Jungle", "count": 38 }
+      ],
+      "Sylas": [
+        { "x": 175, "y": 205, "location": "Mid Lane", "count": 165 },
+        { "x": 375, "y": 170, "location": "Baron Pit", "count": 95 },
+        { "x": 215, "y": 415, "location": "River", "count": 128 },
+        { "x": 450, "y": 345, "location": "Enemy Base", "count": 72 },
+        { "x": 110, "y": 345, "location": "Jungle", "count": 48 }
+      ],
+      "Qiyana": [
+        { "x": 155, "y": 195, "location": "Mid Lane", "count": 125 },
+        { "x": 355, "y": 145, "location": "Baron Pit", "count": 78 },
+        { "x": 195, "y": 395, "location": "River", "count": 98 },
+        { "x": 435, "y": 325, "location": "Enemy Base", "count": 52 },
+        { "x": 98, "y": 325, "location": "Jungle", "count": 32 }
+      ]
+    }
+  },
+  "red": {
+    "deathLocationData": {
+      "Ahri": [
+        { "x": 350, "y": 300, "location": "Mid Lane", "count": 42 },
+        { "x": 150, "y": 350, "location": "Baron Pit", "count": 28 },
+        { "x": 300, "y": 100, "location": "River", "count": 35 },
+        { "x": 50, "y": 150, "location": "Enemy Base", "count": 18 },
+        { "x": 400, "y": 150, "location": "Jungle", "count": 22 }
+      ],
+      "Lux": [
+        { "x": 300, "y": 250, "location": "Mid Lane", "count": 32 },
+        { "x": 100, "y": 300, "location": "Baron Pit", "count": 18 },
+        { "x": 350, "y": 120, "location": "River", "count": 28 },
+        { "x": 20, "y": 200, "location": "Enemy Base", "count": 12 },
+        { "x": 380, "y": 180, "location": "Jungle", "count": 8 }
+      ],
+      "Zed": [
+        { "x": 320, "y": 280, "location": "Mid Lane", "count": 56 },
+        { "x": 120, "y": 320, "location": "Baron Pit", "count": 32 },
+        { "x": 280, "y": 80, "location": "River", "count": 38 },
+        { "x": 80, "y": 140, "location": "Enemy Base", "count": 20 },
+        { "x": 390, "y": 140, "location": "Jungle", "count": 10 }
+      ],
+      "Yasuo": [
+        { "x": 330, "y": 290, "location": "Mid Lane", "count": 62 },
+        { "x": 130, "y": 340, "location": "Baron Pit", "count": 38 },
+        { "x": 290, "y": 90, "location": "River", "count": 44 },
+        { "x": 40, "y": 160, "location": "Enemy Base", "count": 22 },
+        { "x": 395, "y": 160, "location": "Jungle", "count": 12 }
+      ],
+      "Evelynn": [
+        { "x": 360, "y": 320, "location": "Mid Lane", "count": 28 },
+        { "x": 160, "y": 360, "location": "Baron Pit", "count": 15 },
+        { "x": 310, "y": 110, "location": "River", "count": 22 },
+        { "x": 30, "y": 180, "location": "Enemy Base", "count": 14 },
+        { "x": 405, "y": 170, "location": "Jungle", "count": 8 }
+      ],
+      "Akali": [
+        { "x": 340, "y": 310, "location": "Mid Lane", "count": 38 },
+        { "x": 140, "y": 350, "location": "Baron Pit", "count": 22 },
+        { "x": 300, "y": 100, "location": "River", "count": 30 },
+        { "x": 60, "y": 170, "location": "Enemy Base", "count": 16 },
+        { "x": 400, "y": 160, "location": "Jungle", "count": 6 }
+      ],
+      "Sylas": [
+        { "x": 325, "y": 295, "location": "Mid Lane", "count": 48 },
+        { "x": 125, "y": 330, "location": "Baron Pit", "count": 28 },
+        { "x": 285, "y": 85, "location": "River", "count": 32 },
+        { "x": 50, "y": 155, "location": "Enemy Base", "count": 18 },
+        { "x": 390, "y": 155, "location": "Jungle", "count": 8 }
+      ],
+      "Qiyana": [
+        { "x": 345, "y": 305, "location": "Mid Lane", "count": 32 },
+        { "x": 145, "y": 355, "location": "Baron Pit", "count": 18 },
+        { "x": 305, "y": 105, "location": "River", "count": 24 },
+        { "x": 65, "y": 175, "location": "Enemy Base", "count": 10 },
+        { "x": 402, "y": 175, "location": "Jungle", "count": 5 }
+      ]
+    },
+    "killLocationData": {
+      "Ahri": [
+        { "x": 350, "y": 300, "location": "Mid Lane", "count": 285 },
+        { "x": 150, "y": 350, "location": "Baron Pit", "count": 210 },
+        { "x": 300, "y": 100, "location": "River", "count": 245 },
+        { "x": 50, "y": 150, "location": "Enemy Base", "count": 156 },
+        { "x": 400, "y": 150, "location": "Jungle", "count": 300 }
+      ],
+      "Lux": [
+        { "x": 300, "y": 250, "location": "Mid Lane", "count": 198 },
+        { "x": 100, "y": 300, "location": "Baron Pit", "count": 102 },
+        { "x": 350, "y": 120, "location": "River", "count": 145 },
+        { "x": 20, "y": 200, "location": "Enemy Base", "count": 85 },
+        { "x": 380, "y": 180, "location": "Jungle", "count": 56 }
+      ],
+      "Zed": [
+        { "x": 320, "y": 280, "location": "Mid Lane", "count": 385 },
+        { "x": 120, "y": 320, "location": "Baron Pit", "count": 245 },
+        { "x": 280, "y": 80, "location": "River", "count": 325 },
+        { "x": 80, "y": 140, "location": "Enemy Base", "count": 178 },
+        { "x": 390, "y": 140, "location": "Jungle", "count": 95 }
+      ],
+      "Yasuo": [
+        { "x": 330, "y": 290, "location": "Mid Lane", "count": 425 },
+        { "x": 130, "y": 340, "location": "Baron Pit", "count": 285 },
+        { "x": 290, "y": 90, "location": "River", "count": 358 },
+        { "x": 40, "y": 160, "location": "Enemy Base", "count": 195 },
+        { "x": 395, "y": 160, "location": "Jungle", "count": 108 }
+      ],
+      "Evelynn": [
+        { "x": 360, "y": 320, "location": "Mid Lane", "count": 265 },
+        { "x": 160, "y": 360, "location": "Baron Pit", "count": 145 },
+        { "x": 310, "y": 110, "location": "River", "count": 198 },
+        { "x": 30, "y": 180, "location": "Enemy Base", "count": 125 },
+        { "x": 405, "y": 170, "location": "Jungle", "count": 95 }
+      ],
+      "Akali": [
+        { "x": 340, "y": 310, "location": "Mid Lane", "count": 325 },
+        { "x": 140, "y": 350, "location": "Baron Pit", "count": 185 },
+        { "x": 300, "y": 100, "location": "River", "count": 255 },
+        { "x": 60, "y": 170, "location": "Enemy Base", "count": 145 },
+        { "x": 400, "y": 160, "location": "Jungle", "count": 68 }
+      ],
+      "Sylas": [
+        { "x": 325, "y": 295, "location": "Mid Lane", "count": 328 },
+        { "x": 125, "y": 330, "location": "Baron Pit", "count": 215 },
+        { "x": 285, "y": 85, "location": "River", "count": 268 },
+        { "x": 50, "y": 155, "location": "Enemy Base", "count": 158 },
+        { "x": 390, "y": 155, "location": "Jungle", "count": 88 }
+      ],
+      "Qiyana": [
+        { "x": 345, "y": 305, "location": "Mid Lane", "count": 245 },
+        { "x": 145, "y": 355, "location": "Baron Pit", "count": 148 },
+        { "x": 305, "y": 105, "location": "River", "count": 185 },
+        { "x": 65, "y": 175, "location": "Enemy Base", "count": 95 },
+        { "x": 402, "y": 175, "location": "Jungle", "count": 52 }
+      ]
+    },
+    "assistLocationData": {
+      "Ahri": [
+        { "x": 350, "y": 300, "location": "Mid Lane", "count": 156 },
+        { "x": 150, "y": 350, "location": "Baron Pit", "count": 95 },
+        { "x": 300, "y": 100, "location": "River", "count": 128 },
+        { "x": 50, "y": 150, "location": "Enemy Base", "count": 72 },
+        { "x": 400, "y": 150, "location": "Jungle", "count": 98 }
+      ],
+      "Lux": [
+        { "x": 300, "y": 250, "location": "Mid Lane", "count": 250 },
+        { "x": 100, "y": 300, "location": "Baron Pit", "count": 135 },
+        { "x": 350, "y": 120, "location": "River", "count": 198 },
+        { "x": 20, "y": 200, "location": "Enemy Base", "count": 98 },
+        { "x": 380, "y": 180, "location": "Jungle", "count": 65 }
+      ],
+      "Zed": [
+        { "x": 320, "y": 280, "location": "Mid Lane", "count": 145 },
+        { "x": 120, "y": 320, "location": "Baron Pit", "count": 85 },
+        { "x": 280, "y": 80, "location": "River", "count": 125 },
+        { "x": 80, "y": 140, "location": "Enemy Base", "count": 65 },
+        { "x": 390, "y": 140, "location": "Jungle", "count": 42 }
+      ],
+      "Yasuo": [
+        { "x": 330, "y": 290, "location": "Mid Lane", "count": 158 },
+        { "x": 130, "y": 340, "location": "Baron Pit", "count": 102 },
+        { "x": 290, "y": 90, "location": "River", "count": 145 },
+        { "x": 40, "y": 160, "location": "Enemy Base", "count": 75 },
+        { "x": 395, "y": 160, "location": "Jungle", "count": 48 }
+      ],
+      "Evelynn": [
+        { "x": 360, "y": 320, "location": "Mid Lane", "count": 198 },
+        { "x": 160, "y": 360, "location": "Baron Pit", "count": 98 },
+        { "x": 310, "y": 110, "location": "River", "count": 145 },
+        { "x": 30, "y": 180, "location": "Enemy Base", "count": 88 },
+        { "x": 405, "y": 170, "location": "Jungle", "count": 65 }
+      ],
+      "Akali": [
+        { "x": 340, "y": 310, "location": "Mid Lane", "count": 125 },
+        { "x": 140, "y": 350, "location": "Baron Pit", "count": 75 },
+        { "x": 300, "y": 100, "location": "River", "count": 102 },
+        { "x": 60, "y": 170, "location": "Enemy Base", "count": 65 },
+        { "x": 400, "y": 160, "location": "Jungle", "count": 38 }
+      ],
+      "Sylas": [
+        { "x": 325, "y": 295, "location": "Mid Lane", "count": 165 },
+        { "x": 125, "y": 330, "location": "Baron Pit", "count": 95 },
+        { "x": 285, "y": 85, "location": "River", "count": 128 },
+        { "x": 50, "y": 155, "location": "Enemy Base", "count": 72 },
+        { "x": 390, "y": 155, "location": "Jungle", "count": 48 }
+      ],
+      "Qiyana": [
+        { "x": 345, "y": 305, "location": "Mid Lane", "count": 125 },
+        { "x": 145, "y": 355, "location": "Baron Pit", "count": 78 },
+        { "x": 305, "y": 105, "location": "River", "count": 98 },
+        { "x": 65, "y": 175, "location": "Enemy Base", "count": 52 },
+        { "x": 402, "y": 175, "location": "Jungle", "count": 32 }
+      ]
+    }
+  }
+}
