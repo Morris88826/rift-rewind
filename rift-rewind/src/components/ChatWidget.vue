@@ -160,10 +160,7 @@ const sendMessage = async () => {
   await nextTick()
   scrollToBottom()
 
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // Get AI response (placeholder - integrate with actual API)
+  // Get AI response from backend API
   const response = await getAIResponse(message)
 
   // Add assistant response
@@ -187,18 +184,61 @@ const scrollToBottom = () => {
 }
 
 const getAIResponse = async (userMessage) => {
-  // TODO: Replace this with actual API call
-  // Example: OpenAI API, Claude API, or your own backend
+  return new Promise(async (resolve, reject) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+      const response = await fetch(`${apiUrl}/api/v1/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          puuid: riotId.value || null,
+          stream: true,
+        }),
+      })
 
-  // Placeholder responses
-  const placeholderResponses = [
-    'That\'s a great question! I\'m currently a demo version. To integrate with a real AI, replace this function with an API call to your preferred AI service (like OpenAI, Claude, or your own backend).',
-    'I\'m learning! Right now I can only provide placeholder responses, but once you integrate me with an AI API, I can give you real answers about League of Legends, gaming, and help you use Rift Rewind.',
-    'Thanks for chatting with me! To make me fully functional, you\'ll need to integrate an AI service. Check the getAIResponse function in ChatWidget.vue for integration instructions.',
-    'I\'m ready to help! Please integrate me with your preferred AI API to provide real, intelligent responses.',
-  ]
+      if (!response.ok) {
+        const error = await response.json()
+        reject(new Error(error.error || 'Unknown error'))
+        return
+      }
 
-  return placeholderResponses[Math.floor(Math.random() * placeholderResponses.length)]
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let fullResponse = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.substring(6)
+
+            if (data === '[DONE]') {
+              resolve(fullResponse)
+              return
+            } else if (data.startsWith('[ERROR]')) {
+              reject(new Error(data.substring(7)))
+              return
+            } else if (data.trim()) {
+              fullResponse += data
+            }
+          }
+        }
+      }
+
+      resolve(fullResponse)
+    } catch (error) {
+      console.error('Chat API error:', error)
+      reject(error)
+    }
+  })
 }
 </script>
 
