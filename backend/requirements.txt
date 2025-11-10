@@ -11,7 +11,7 @@ psycopg2-binary==2.9.9  # PostgreSQL adapter (for production)
 
 # AWS Bedrock
 boto3==1.28.85
-strands==0.1.6
+strands-agents
 
 # API client
 requests==2.31.0
